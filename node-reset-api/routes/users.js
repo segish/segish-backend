@@ -5,11 +5,6 @@ const jwt = require("jsonwebtoken");
 
 //updat uesr
 router.put("/update", async(req,res)=>{
-  const token = req.cookies.accessToken;
-  if(!token) return res.status(401).json("You must login first!");
-
-  jwt.verify(token, "secretkey", async (err, userInfo)=>{
-      if(err) return res.status(403).json("Token is not valid!");
       if(req.body.password){
           try{
               const salt = await bcrypt.genSalt(10);
@@ -19,30 +14,14 @@ router.put("/update", async(req,res)=>{
           }
       }
       try{
-          const user = await User.findByIdAndUpdate(userInfo.id,{
+          const user = await User.findByIdAndUpdate(req.query.user,{
               $set: req.body,
           })
           res.status(200).json("updated");
       }catch(err){
           return res.status(500).json(err) 
       }
-    })
 })
-
-//delete user
-router.delete("/:id", async (req, res) => {
-  if (req.body.userId === req.params.id || req.body.isAdmin) {
-    try {
-      await User.findByIdAndDelete(req.params.id);
-      res.status(200).json("Account has been deleted");
-    } catch (err) {
-      return res.status(500).json(err);
-    }
-  } else {
-    return res.status(403).json("You can delete only your account!");
-  }
-});
-
 
 
 //get user
@@ -59,17 +38,12 @@ router.get("/:id", async (req, res) => {
 //follow a user 
 
 router.put("/:id/follow", async (req, res) => {
-  const token = req.cookies.accessToken;
-  if(!token) return res.status(401).json("You must login first!");
-
-  jwt.verify(token, "secretkey", async (err, userInfo)=>{
-      if(err) return res.status(403).json("Token is not valid!");
-      if (userInfo.id !== req.params.id) {
+      if (req.query.follower !== req.params.id) {
         try {
           const user = await User.findById(req.params.id);
-          const currentUser = await User.findById(userInfo.id);
-          if (!user.followers.includes(userInfo.id)) {
-            await user.updateOne({ $push: { followers: userInfo.id } });
+          const currentUser = await User.findById(req.query.follower);
+          if (!user.followers.includes(req.query.follower)) {
+            await user.updateOne({ $push: { followers: req.query.follower } });
             await currentUser.updateOne({ $push: { followings: req.params.id } });
             res.status(200).json("user has been followed");
           } else {
@@ -81,23 +55,17 @@ router.put("/:id/follow", async (req, res) => {
       } else {
         res.status(403).json("you cant follow yourself");
       }
-    })
 });
 
 // //unfollow a user
 
 router.put("/:id/unfollow", async (req, res) => {
-  const token = req.cookies.accessToken;
-  if(!token) return res.status(401).json("You must login first!");
-
-  jwt.verify(token, "secretkey", async (err, userInfo)=>{
-      if(err) return res.status(403).json("Token is not valid!");
-      if (userInfo.id !== req.params.id) {
+      if (req.query.user !== req.params.id) {
       try {
         const user = await User.findById(req.params.id);
-        const currentUser = await User.findById(userInfo.id);
-        if (user.followers.includes(userInfo.id)) {
-          await user.updateOne({ $pull: { followers: userInfo.id } });
+        const currentUser = await User.findById(req.query.user);
+        if (user.followers.includes(req.query.user)) {
+          await user.updateOne({ $pull: { followers: req.query.user } });
           await currentUser.updateOne({ $pull: { followings: req.params.id } });
           res.status(200).json("user has been unfollowed");
         } else {
@@ -109,38 +77,19 @@ router.put("/:id/unfollow", async (req, res) => {
     } else {
       res.status(403).json("you cant unfollow yourself");
     }
-  })
 });
 
-router.get("/suggesion/get", async (req, res) => {
-  const token = req.cookies.accessToken;
-  if(!token) return res.status(401).json("You must login first!");
-
-  jwt.verify(token, "secretkey", async (err, userInfo)=>{
-      if(err) return res.status(403).json("Token is not valid!");
+router.get("/suggesion/get/:id", async (req, res) => {
     try{
-      const currentUser = await User.findById(userInfo.id)
+      const currentUser = await User.findById(req.params.id)
       const samples = await User.aggregate([{
-        $match:{username:{$ne:currentUser.username},followers:{$ne:userInfo.id}}},
+        $match:{username:{$ne:currentUser.username},followers:{$ne:req.params.id}}},
         { $sample: { size: 4 } },
       ]).exec();
           res.status(200).json(samples);
     } catch (err) {
       res.status(500).json(err);
     }
-  })
 });
-
-// //search user
-// router.get("/search/get", async (req, res) => {
-//   try{
-//     const search = await User.findById(567890)
-//     const { password, updatedAt, ...others } = search._doc;
-//         res.status(200).json(others);
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
-
 
 module.exports = router;
