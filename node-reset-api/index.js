@@ -58,6 +58,6 @@ app.use("/api/search", searchRouter)
 app.use("/api/stories", StoryRouter)
 
 
-app.listen(8800, () => {
+app.listen(3000, () => {
     console.log("Backend server is running!");
   });
