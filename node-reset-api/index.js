@@ -27,7 +27,7 @@ app.use((req,res,next) => {
 app.use(express.json());
 app.use(
     cors({
-        origin: "https://6489e9caf51c400d329d3413--coruscating-kangaroo-3efce4.netlify.app/",
+        origin: "https://6489e9caf51c400d329d3413--coruscating-kangaroo-3efce4.netlify.app",
     })
 );
 app.use(cookieParser());
