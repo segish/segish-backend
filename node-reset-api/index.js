@@ -28,7 +28,7 @@ app.use(express.json({limit : '50mb'}));
 app.use(express.urlencoded({limit : '50mb',extended : true}));
 app.use(
     cors({
-        origin: "https://64a079c4de745159447bd8a2--shiny-otter-825bc0.netlify.app",
+        origin: "https://64a08dfea3ef6d67057df2ea--tranquil-kleicha-865e83.netlify.app",
     })
 );
 app.use(cookieParser());
