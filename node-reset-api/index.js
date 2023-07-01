@@ -27,7 +27,7 @@ app.use((req,res,next) => {
 app.use(express.json());
 app.use(
     cors({
-        origin: "https://648a4c2ceadcfd16c8e427c9--stalwart-kulfi-9d6325.netlify.app",
+        origin: "https://64a079c4de745159447bd8a2--shiny-otter-825bc0.netlify.app",
     })
 );
 app.use(cookieParser());
